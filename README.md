@@ -4,7 +4,7 @@
 As part of our major project in Creative Coding, our group has chosen an artwork to represent through code. This task involves analyzing the selected artwork's characteristics and employing coding techniques to create a digital interpretation.
 
 ### Selected Artwork
-![Selected Artwork](https://canvas.sydney.edu.au/courses/56592/files/35576064)
+![Selected Artwork](https://www.artsy.net/artwork/pacita-abad-wheels-of-fortune)
 
 ### Artwork Analysis
 The chosen artwork is defined by its vibrant colors and complex geometric patterns, including distinct lines and flat partitions. It presents an excellent challenge for coding due to its intricate and repetitive elements.
