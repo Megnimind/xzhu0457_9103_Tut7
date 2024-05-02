@@ -54,7 +54,8 @@ Using this technique, we can simulate the dynamic behavior of fluids in real tim
 
 ### Link for example
 Link to Code Web Demo：https://paveldogreat.github.io/WebGL-Fluid-Simulation/
-More examples of presentations. https://experiments.withgoogle.com/search?q=fluid
+
+More examples of presentations: https://experiments.withgoogle.com/search?q=fluid
 
 
 
