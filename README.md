@@ -30,5 +30,33 @@ For inspiration and references, we explored various digital artworks and coding 
 **Course:** IDED9103 Creative Coding  
 **Institution:** University of Sydney
 
+## Week8 Quiz
+### Part 1: Imaging Technique Inspiration
+Inspiration: Fluid Dynamics Simulation
+In many visually stunning movies, such as The King of the Sea and the underwater effects in Avatar, fluid dynamics simulation is used to create realistic fluid dynamics that provide the viewer with an extremely realistic experience.  Often, fluid dynamics simulation is used to create realistic fluid dynamics, providing the viewer with an extremely realistic underwater effect and experience.
+
+How it helps us design: 
+This technology can be used to create dynamic and interactive elements in digital artworks, enhancing the flow of the artwork to make it more visually appealing. At the same time, this technology can help us to present a more vivid visual story to the audience through dynamic liquid simulation when displaying artworks. For example, through AE to make Van Gogh's starry sky flow. But this is not part of the code technology but a good example, we can use the code to show it : https://www.youtube.com/watch?v=1-c1w-SWweY
+
+### Artwork picture
+![Avatar (movie)](https://static01.nyt.com/images/2022/12/13/multimedia/13avatar-fx-1-3a70/13avatar-fx-1-3a70-superJumbo.jpg?quality=75&auto=webp)
+
+![Aquaman (movie)](https://static1.srcdn.com/wordpress/wp-content/uploads/2022/03/Aquaman-sitting-on-his-throne.jpg?q=50&fit=crop&w=1500&dpr=1.5)
+
+### Part 2: Coding Technique Exploration
+
+Technology: 
+Fluid Dynamics Simulation with WebGL and GLSL Shader
+Efficient fluid dynamics simulations can be achieved in the browser using WebGL and GLSL (OpenGL Shading Language) together, a technique that mimics the natural motion of real bodies of water and other fluids.
+
+Application Approach:
+Using this technique, we can simulate the dynamic behavior of fluids in real time in web pages, increasing the interactivity and visual appeal of the artwork. This simulation can be influenced by user input (e.g., mouse movements) to create a dynamic art environment that responds to user behavior.
+
+### Link for example
+Link to Code Web Demo：https://paveldogreat.github.io/WebGL-Fluid-Simulation/
+More examples of presentations. https://experiments.withgoogle.com/search?q=fluid
+
+
+
 
 
