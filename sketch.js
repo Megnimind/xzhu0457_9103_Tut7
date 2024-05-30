@@ -1,154 +1,79 @@
+//Inspired by Mondrian Variations - Broadway Boogie Woogie 1943 - Éva Polgár and Sándor Vály, 
+//It is the generation of production animation by the level or frequency content of the audio track. Link: https://www.youtube.com/watch?v=62pjrVGyGLM
+
+//Due to Google's server security, you need to click on GO LIVE to run it smoothly.　
+//Tap the screen to start playback, space to reset the background
+
+
 let gridSize = 10;
-let colors = ['#FFD700', '#FF0000', '#0000FF', '#D3D3D3', '#F5F5DC'];
-let specialColumnPositions;
-let bigBlocks = [];
+let soundFile;
+let fft;
+let lineCount = 0;
+let maxLines = 50; // Set the maximum number of lines generated to 50
+let currentLineIndex = 0; // Index of currently processed lines
+
+function preload() {
+  soundFile = loadSound('assets/music1.mp3'); // Loading a new audio file
+}
 
 function setup() {
-  createCanvas(650, 690);
-  noStroke();
-  scale(1.5); // Adjust the zoom of the canvas to enlarge the entire content
-  specialColumnPositions = {
-    1: getRandomSegmentedPositions(),
-    24: getRandomSegmentedPositions(),
-    37: getRandomSegmentedPositions(),
-    39: getRandomSegmentedPositions()
-  };
-  for (let y = 0; y < height / 1.5; y += gridSize) { // Since the canvas is enlarged, the boundaries of the loop need to be adjusted
-    for (let x = 0; x < width / 1.5; x += gridSize) {
-      if (isSpecialRow(y) || isSpecialColumn(x)) {
-        let colorIndex = randomSpecialColorIndex();
-        fill(colors[colorIndex]);
-      } else if (isSpecialRowSecond(y, x)) {
-        let colorIndex = randomSpecialColorIndexSecond();
-        fill(colors[colorIndex]);
-      } else if (isSpecialColumnThird(x, y)) {
-        let colorIndex = randomSpecialColorIndexThird(x, y);
-        fill(colors[colorIndex]);
-      } else {
-        fill(colors[4]);
+  createCanvas(650, 690); // Setting the canvas size
+  background(0); // Set the background to black
+  stroke(255); // Set the line to white
+
+  fft = new p5.FFT();
+
+  // Prompts the user to tap the screen to start audio playback
+  textSize(32);
+  fill(255);
+  textAlign(CENTER, CENTER);
+  text('Click to start', width / 2, height / 2);
+}
+
+function draw() {
+  if (soundFile.isPlaying() && lineCount < maxLines) {
+    let spectrum = fft.analyze();
+    drawLines(spectrum);
+  }
+}
+
+function drawLines(spectrum) {
+  let linesPerFrame = 4; // Number of lines generated per frame
+
+  for (let i = 0; i < linesPerFrame; i++) {
+    if (lineCount >= maxLines) return;
+
+    let index = currentLineIndex % (width / gridSize + height / gridSize);
+    if (index < height / gridSize) {
+      let y = index * gridSize;
+      let level = map(spectrum[int(random(0, spectrum.length))], 0, 255, 0, 1);
+      if (level > 0.5) {
+        line(0, y, width, y); // Setting the horizontal line from left to right
+        lineCount++;
       }
-      rect(x, y, gridSize, gridSize);
-    }
-  }
-
-  // Generate and draw large squares to be placed at the top of the layer
-  generateAndDrawBigBlocks();
-
-  // Add center cube to 9 random large cubes
-  let selectedBlocks = shuffle(bigBlocks).slice(0, 9);
-  selectedBlocks.forEach(block => {
-    let smallWidth = block.w * 2 / 5;
-    let smallHeight = block.h * 2 / 5;
-    let smallX = block.x + (block.w - smallWidth) / 2;
-    let smallY = block.y + (block.h - smallHeight) / 2;
-
-    let otherColors = ['#FF0000', '#FDFD96', '#0000FF'].filter(c => c !== block.color); // Excluding the color of large squares
-    let smallColor = random(otherColors); // Randomly select a different color
-    fill(smallColor);
-    rect(smallX * gridSize, smallY * gridSize, smallWidth * gridSize, smallHeight * gridSize);
-  });
-}
-
-function isSpecialRow(y) {
-  let row = y / gridSize;
-  return [1, 8, 21, 27, 30, 42, 47].includes(row);
-}
-
-function isSpecialRowSecond(y, x) {
-  let row = y / gridSize;
-  let col = x / gridSize;
-  if ([33, 38, 44].includes(row)) {
-    return col < 3;
-  }
-  return false;
-}
-
-function isSpecialColumn(x) {
-  let col = x / gridSize;
-  return [3, 6, 11, 22, 35, 41].includes(col);
-}
-
-function isSpecialColumnThird(x, y) {
-  let col = x / gridSize;
-  return [1, 24, 37, 39].includes(col);
-}
-
-function randomSpecialColorIndex() {
-  let rnd = random(100);
-  if (rnd < 70) {
-    return 0; // Yellow
-  } else if (rnd < 80) {
-    return 1; // Red
-  } else if (rnd < 90) {
-    return 2; // Blue
-  } else {
-    return 3; // Gray
-  }
-}
-
-function randomSpecialColorIndexSecond() {
-  let rnd = random(100);
-  if (rnd < 66) {
-    return 0; // Yellow
-  } else if (rnd < 100) {
-    return Math.floor(random(1, 4)); // Random between Red, Blue, Gray
-  }
-}
-
-function randomSpecialColorIndexThird(x, y) {
-  let col = x / gridSize;
-  let row = y / gridSize;
-
-  if (specialColumnPositions[col] && specialColumnPositions[col].includes(row)) {
-    let rnd = random(100);
-    if (rnd < 60) {
-      return 0; // Yellow
     } else {
-      return Math.floor(random(1, 4)); // Random between Red, Blue, Gray
-    }
-  }
-  return 4; // Skin color
-}
-
-function getRandomSegmentedPositions() {
-  let positions = [];
-  while (positions.length < 24) {
-    let segmentLength = random(10, 15);
-    let segmentStart = Math.floor(random(49 - segmentLength));
-    for (let i = 0; i < segmentLength; i++) {
-      if (positions.length < 24 && !positions.includes(segmentStart + i)) {
-        positions.push(segmentStart + i);
+      let x = (index - height / gridSize) * gridSize;
+      let level = map(spectrum[int(random(0, spectrum.length))], 0, 255, 0, 1);
+      if (level > 0.5) {
+        line(x, 0, x, height); // Setting the vertical line from top to bottom
+        lineCount++;
       }
     }
-  }
-  return positions;
-}
-
-function generateAndDrawBigBlocks() {
-  let colors = ['#FF0000', '#FDFD96', '#0000FF']; // Red, Yellow, Blue
-  let gridCount = 49;
-  for (let i = 0; i < 15; i++) {
-    let w = floor(random(4, 8));
-    let h = floor(random(4, 8));
-    let x, y;
-
-    do {
-      x = floor(random(0, gridCount - w));
-      y = floor(random(0, gridCount - h));
-    } while (!(isSpecialRow(y * gridSize) || isSpecialRow((y + h) * gridSize - 1) ||
-               isSpecialColumn(x * gridSize) || isSpecialColumn((x + w) * gridSize - 1)));
-
-    let color = random(colors);
-    bigBlocks.push({x, y, w, h, color});
-    fill(color);
-    rect(x * gridSize, y * gridSize, w * gridSize, h * gridSize);
+    currentLineIndex++;
   }
 }
 
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = floor(random(i + 1));
-    [array[i], array[j]] = [array[j], array[i]]; // Element exchange
+function mousePressed() {
+  if (!soundFile.isPlaying()) {
+    soundFile.play(); // Play audio
+    background(0); // Reset background
   }
-  return array;
+}
+
+function keyPressed() {
+  if (key === ' ') {
+    background(0); // Press the space bar to reset the background
+    lineCount = 0; // Reset Line Counter
+    currentLineIndex = 0; // Reset current line index
+  }
 }

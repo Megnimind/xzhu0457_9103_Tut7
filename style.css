@@ -4,6 +4,7 @@ body {
   align-items: center;
   height: 100vh;
   margin: 0;
+  background-color: black; /* Make sure the page background is black */
 }
 canvas {
   display: block;
