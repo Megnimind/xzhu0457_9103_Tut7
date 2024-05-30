@@ -1,46 +1,38 @@
+let gridSize = 10;
+let colors = ['#FFD700', '#FF0000', '#0000FF', '#D3D3D3', '#F5F5DC'];
+let specialColumnPositions;
+let bigBlocks = [];
+
 function setup() {
-  createCanvas(windowWidth, windowHeight);
-  noLoop(); // Ensure that the draw() function is only run once
-}
-
-function draw() {
-  background(255); // Set the background to white
-  let gridCount = 55; // 55 rows and 55 columns
-  let gridSize = min(width, height) / gridCount; // Dynamically calculates the grid size to fit the screen size, keeping the grid in the center of the screen
-
-  let startX = (width - gridSize * gridCount) / 2; // Calculate the x-coordinate of the start of the drawing to center the grid
-  let startY = (height - gridSize * gridCount) / 2; // Calculate the y-coordinate of the start of the drawing to center the grid
-
-  let minArea = 0.35 * gridCount * gridCount;
-  let maxArea = 0.45 * gridCount * gridCount;
-
-  // Generate a fixed blank area and draw it
-  let fixedSpaces = generateFixedSpaces(gridCount, minArea, maxArea);
-  noStroke(); // Disable Stroke
-  fill('#FFFFFF'); // Set the color of the blank area to white
-  fixedSpaces.forEach(space => {
-    rect(startX + space.x * gridSize, startY + space.y * gridSize, space.w * gridSize, space.h * gridSize);
-  });
-
-  // Set up an array of colors to increase the frequency of occurrence of yellow and white
-  let colors = ['#FDFD96', '#FDFD96', '#FDFD96', '#FFFFFF', '#FFFFFF', '#0000FF', '#FF0000', '#808080'];
-  // Draw small squares of random color in the remaining space
-  for (let x = 0; x < gridCount; x++) {
-    for (let y = 0; y < gridCount; y++) {
-      if (!fixedSpaces.some(space => x >= space.x && x < space.x + space.w && y >= space.y && y < space.y + space.h)) {
-        let colorIndex = floor(random(colors.length));
-        fill(colors[colorIndex]); // Setting the color
-        rect(startX + x * gridSize, startY + y * gridSize, gridSize, gridSize); // 绘制单个小方块
+  createCanvas(650, 690);
+  noStroke();
+  scale(1.5); // Adjust the zoom of the canvas to enlarge the entire content
+  specialColumnPositions = {
+    1: getRandomSegmentedPositions(),
+    24: getRandomSegmentedPositions(),
+    37: getRandomSegmentedPositions(),
+    39: getRandomSegmentedPositions()
+  };
+  for (let y = 0; y < height / 1.5; y += gridSize) { // Since the canvas is enlarged, the boundaries of the loop need to be adjusted
+    for (let x = 0; x < width / 1.5; x += gridSize) {
+      if (isSpecialRow(y) || isSpecialColumn(x)) {
+        let colorIndex = randomSpecialColorIndex();
+        fill(colors[colorIndex]);
+      } else if (isSpecialRowSecond(y, x)) {
+        let colorIndex = randomSpecialColorIndexSecond();
+        fill(colors[colorIndex]);
+      } else if (isSpecialColumnThird(x, y)) {
+        let colorIndex = randomSpecialColorIndexThird(x, y);
+        fill(colors[colorIndex]);
+      } else {
+        fill(colors[4]);
       }
+      rect(x, y, gridSize, gridSize);
     }
   }
 
   // Generate and draw large squares to be placed at the top of the layer
-  let bigBlocks = generateBigBlocks(15, gridCount, ['#FF0000', '#FDFD96', '#0000FF'], gridSize);
-  bigBlocks.forEach(block => {
-    fill(block.color); // Setting the color of the big square
-    rect(startX + block.x * gridSize, startY + block.y * gridSize, block.w * gridSize, block.h * gridSize);
-  });
+  generateAndDrawBigBlocks();
 
   // Add center cube to 9 random large cubes
   let selectedBlocks = shuffle(bigBlocks).slice(0, 9);
@@ -53,49 +45,104 @@ function draw() {
     let otherColors = ['#FF0000', '#FDFD96', '#0000FF'].filter(c => c !== block.color); // Excluding the color of large squares
     let smallColor = random(otherColors); // Randomly select a different color
     fill(smallColor);
-    rect(startX + smallX * gridSize, startY + smallY * gridSize, smallWidth * gridSize, smallHeight * gridSize);
+    rect(smallX * gridSize, smallY * gridSize, smallWidth * gridSize, smallHeight * gridSize);
   });
 }
 
-function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
-  redraw(); // Redraw the canvas when the window size changes
+function isSpecialRow(y) {
+  let row = y / gridSize;
+  return [1, 8, 21, 27, 30, 42, 47].includes(row);
 }
 
-function generateFixedSpaces(gridCount, minArea, maxArea) {
-  let spaces = [];
-  let totalArea = 0;
-  while (totalArea < minArea) {
-    let w = floor(random(3, 10)); // Generate random widths from 3 to 10 cells in width
-    let h = floor(random(2, 6)); // Generate random heights with heights from 2 to 6 cells
-    let x = floor(random(0, gridCount - w)); // Randomize the X position to ensure that the shape does not exceed the mesh boundary
-    let y = floor(random(0, gridCount - h)); // Randomize the Y position to ensure that the shape does not exceed the mesh boundary
-    let area = w * h; // Calculate the area of the current shape
-    if (!isOverlap(spaces, x, y, w, h) && totalArea + area <= maxArea) { // Ensure that there is no overlap and that the maximum area is not exceeded
-      spaces.push({x, y, w, h});
-      totalArea += area;
+function isSpecialRowSecond(y, x) {
+  let row = y / gridSize;
+  let col = x / gridSize;
+  if ([33, 38, 44].includes(row)) {
+    return col < 3;
+  }
+  return false;
+}
+
+function isSpecialColumn(x) {
+  let col = x / gridSize;
+  return [3, 6, 11, 22, 35, 41].includes(col);
+}
+
+function isSpecialColumnThird(x, y) {
+  let col = x / gridSize;
+  return [1, 24, 37, 39].includes(col);
+}
+
+function randomSpecialColorIndex() {
+  let rnd = random(100);
+  if (rnd < 70) {
+    return 0; // Yellow
+  } else if (rnd < 80) {
+    return 1; // Red
+  } else if (rnd < 90) {
+    return 2; // Blue
+  } else {
+    return 3; // Gray
+  }
+}
+
+function randomSpecialColorIndexSecond() {
+  let rnd = random(100);
+  if (rnd < 66) {
+    return 0; // Yellow
+  } else if (rnd < 100) {
+    return Math.floor(random(1, 4)); // Random between Red, Blue, Gray
+  }
+}
+
+function randomSpecialColorIndexThird(x, y) {
+  let col = x / gridSize;
+  let row = y / gridSize;
+
+  if (specialColumnPositions[col] && specialColumnPositions[col].includes(row)) {
+    let rnd = random(100);
+    if (rnd < 60) {
+      return 0; // Yellow
+    } else {
+      return Math.floor(random(1, 4)); // Random between Red, Blue, Gray
     }
   }
-  return spaces;
+  return 4; // Skin color
 }
 
-function generateBigBlocks(numBlocks, gridCount, colors, gridSize) {
-  let blocks = [];
-  for (let i = 0; i < numBlocks; i++) {
-    let w = floor(random(4, 8)); // Larger squares are wider, 4 to 8 compartments
-    let h = floor(random(4, 8)); // Bigger squares are taller, 4 to 8 squares
-    let x = floor(random(0, gridCount - w)); // Random X position
-    let y = floor(random(0, gridCount - h)); // Random Y position
-    let color = random(colors); // Random color selection
-    if (!isOverlap(blocks, x, y, w, h)) { // Make sure the new square does not overlap with other squares
-      blocks.push({x, y, w, h, color});
+function getRandomSegmentedPositions() {
+  let positions = [];
+  while (positions.length < 24) {
+    let segmentLength = random(10, 15);
+    let segmentStart = Math.floor(random(49 - segmentLength));
+    for (let i = 0; i < segmentLength; i++) {
+      if (positions.length < 24 && !positions.includes(segmentStart + i)) {
+        positions.push(segmentStart + i);
+      }
     }
   }
-  return blocks;
+  return positions;
 }
 
-function isOverlap(shapes, x, y, w, h) {
-  return shapes.some(shape => !(x + w <= shape.x || y + h <= shape.y || x >= shape.x + shape.w || y >= shape.y + shape.h));
+function generateAndDrawBigBlocks() {
+  let colors = ['#FF0000', '#FDFD96', '#0000FF']; // Red, Yellow, Blue
+  let gridCount = 49;
+  for (let i = 0; i < 15; i++) {
+    let w = floor(random(4, 8));
+    let h = floor(random(4, 8));
+    let x, y;
+
+    do {
+      x = floor(random(0, gridCount - w));
+      y = floor(random(0, gridCount - h));
+    } while (!(isSpecialRow(y * gridSize) || isSpecialRow((y + h) * gridSize - 1) ||
+               isSpecialColumn(x * gridSize) || isSpecialColumn((x + w) * gridSize - 1)));
+
+    let color = random(colors);
+    bigBlocks.push({x, y, w, h, color});
+    fill(color);
+    rect(x * gridSize, y * gridSize, w * gridSize, h * gridSize);
+  }
 }
 
 function shuffle(array) {
